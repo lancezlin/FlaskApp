@@ -44,7 +44,7 @@ def signUp():
             cursor.callproc('sp_createUser',(_name,_email,_hashed_password))
             data = cursor.fetchall()
 
-            if len(data) is 0:\
+            if len(data) is 0:
                 conn.commit()
                 return json.dumps({'message':'User created successfully !'})
             else:
