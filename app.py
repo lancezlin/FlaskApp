@@ -144,13 +144,13 @@ def getWish():
 
             wishes_dict = []
             for wish in wishes:
-                wishes_dict = {
+                wish_dict = {
                     'Id' : wish[0],
                     'Title' : wish[1],
                     'Description' : wish[2],
                     'Date' : wish[4]
                 }
-                wishes_dict.append(wishes_dict)
+                wishes_dict.append(wish_dict)
 
             return json.dumps(wishes_dict)
         else:
