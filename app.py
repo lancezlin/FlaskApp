@@ -131,5 +131,33 @@ def addWish():
         cursor.close()
         conn.close()
 
+@app.route('/getWish')
+def getWish():
+    try:
+        if session.get('user'):
+            _user = session.get('user')
+
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.callproc('sp_GetWishByUser', (_user,))
+            wishes = cursor.fetchall()
+
+            wishes_dict = []
+            for wish in wishes:
+                wishes_dict = {
+                    'Id' : wish[0],
+                    'Title' : wish[1],
+                    'Description' : wish[2],
+                    'Date' : wish[4]
+                }
+                wishes_dict.append(wishes_dict)
+
+            return json.dumps(wishes_dict)
+        else:
+            return render_template('error.html', error = 'Unauthorized Access')
+    except Exception as e:
+        return render_template('error.html', error = str(e))
+
+
 if __name__ == "__main__":
     app.run(port=5002)
