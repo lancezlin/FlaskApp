@@ -41,6 +41,10 @@ def userHome():
     else:
         return render_template('error.html', error = 'Unauthorized Access')
 
+@app.route('/showAddWish')
+def showAddWish():
+    return render_template('addWish.html')
+
 @app.route('/signUp',methods=['POST','GET'])
 def signUp():
     try:
@@ -102,4 +106,4 @@ def validateLogin():
         con.close()
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=5002)
