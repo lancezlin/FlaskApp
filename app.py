@@ -158,6 +158,27 @@ def getWish():
     except Exception as e:
         return render_template('error.html', error = str(e))
 
+@ap.route('/getWishById', methods=['POST'])
+def getWishById():
+    try:
+        if session.get('user'):
+
+            _id = request.form['id']
+            _user = session.get('user')
+
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.callproc('sp_GetWishById', (_id, _user))
+            result = cursor.fetchall()
+
+            wish = []
+            wish.append({'Id' : result[0][0], 'Title' : result[0][1], 'Description' : result[0][2]})
+            return json.dumps(wish)
+
+        else:
+            return render_template('error.html', error = 'Unauthorized Access')
+    except Exception as e:
+        return render_template('error.html', error = str(e))
 
 if __name__ == "__main__":
     app.run(port=5002)
