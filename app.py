@@ -199,8 +199,6 @@ def updateWish():
                 return json.dumps({'status' : 'OK'})
             else:
                 return json.dumps({'status' : 'ERROR'})
-        else:
-            return render_template('error.html', error = 'Unauthorized Access!')
     except Exception as e:
         return json.dumps({'status' : 'Unauthorized Access'})
     finally:
