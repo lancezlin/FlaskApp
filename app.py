@@ -158,7 +158,7 @@ def getWish():
     except Exception as e:
         return render_template('error.html', error = str(e))
 
-@ap.route('/getWishById', methods=['POST'])
+@app.route('/getWishById', methods=['POST'])
 def getWishById():
     try:
         if session.get('user'):
@@ -184,11 +184,11 @@ def getWishById():
 def updateWish():
     try:
         if session.get('user'):
+            _user = session.get('user')
             _title = request.form['title']
             _description = request.form['description']
             _wish_id = request.form['id']
-            _user = session.get('user')
-
+            
             conn = mysql.connect()
             cursor = conn.cursor()
             cursor.callproc('sp_udpateWish', (_title, _description, _wish_id, _user))
