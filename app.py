@@ -13,6 +13,8 @@ app.config['MYSQL_DATABASE_DB'] = 'BucketList'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
+# Default setting of page limit
+pageLimit = 2
 
 @app.route('/')
 def main():
@@ -131,17 +133,27 @@ def addWish():
         cursor.close()
         conn.close()
 
-@app.route('/getWish')
+@app.route('/getWish', methods = ['POST'])
 def getWish():
     try:
         if session.get('user'):
             _user = session.get('user')
+            _limit = pageLimit
+            _offset = request.form['offset']
+            _total_records = 0
 
             conn = mysql.connect()
             cursor = conn.cursor()
-            cursor.callproc('sp_GetWishByUser', (_user,))
+            cursor.callproc('sp_GetWishByUser', (_user, _limit, _offset, _total_records))
             wishes = cursor.fetchall()
+            cursor.close()
 
+            cursor = conn.cursor()
+            cursor.execute('SELECT @_sp_GetWishByUser_3');
+            outParam = cursor.fetchall()
+
+
+            response = []
             wishes_dict = []
             for wish in wishes:
                 wish_dict = {
@@ -151,8 +163,10 @@ def getWish():
                     'Date' : wish[4]
                 }
                 wishes_dict.append(wish_dict)
+            response.append(wishes_dict)
+            response.append({'total' : outParam[0][0]})
 
-            return json.dumps(wishes_dict)
+            return json.dumps(response)
         else:
             return render_template('error.html', error = 'Unauthorized Access')
     except Exception as e:
