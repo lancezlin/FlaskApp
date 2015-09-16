@@ -180,7 +180,7 @@ def getWishById():
     except Exception as e:
         return render_template('error.html', error = str(e))
 
-@app.route('/updateWish', methods = ['POST'])
+@app.route('/updateWish', methods=['POST'])
 def updateWish():
     try:
         if session.get('user'):
@@ -188,19 +188,19 @@ def updateWish():
             _title = request.form['title']
             _description = request.form['description']
             _wish_id = request.form['id']
-            
+
             conn = mysql.connect()
             cursor = conn.cursor()
-            cursor.callproc('sp_udpateWish', (_title, _description, _wish_id, _user))
+            cursor.callproc('sp_updateWish',(_title,_description,_wish_id,_user))
             data = cursor.fetchall()
 
             if len(data) is 0:
                 conn.commit()
-                return json.dumps({'status' : 'OK'})
+                return json.dumps({'status':'OK'})
             else:
-                return json.dumps({'status' : 'ERROR'})
+                return json.dumps({'status':'ERROR'})
     except Exception as e:
-        return json.dumps({'status' : 'Unauthorized Access'})
+        return json.dumps({'status':'Unauthorized access'})
     finally:
         cursor.close()
         conn.close()

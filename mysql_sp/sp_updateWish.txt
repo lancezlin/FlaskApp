@@ -1,5 +1,4 @@
 DELIMITER $$
-DROP PROCEDURE IF EXISTS 'sp_updateWish';
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_updateWish`(
 IN p_title varchar(45),
 IN p_description varchar(1000),
