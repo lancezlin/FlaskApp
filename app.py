@@ -1,6 +1,9 @@
-from flask import Flask, render_template, json, request, redirect, session, jsonify
+from flask import Flask, render_template, json, request, redirect, session, jsonify, url_for
 from flask.ext.mysql import MySQL
 from werkzeug import generate_password_hash, check_password_hash
+from werkzeug.wsgi import LimitedStream
+import uuid
+import os
 
 mysql = MySQL()
 app = Flask(__name__)
@@ -14,7 +17,28 @@ app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
 # Default setting of page limit
-pageLimit = 2
+pageLimit = 5
+
+class StreamConsumingMiddleware(object):
+    """docstring for StreamConsumingMiddleware"""
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        stream = LimitedStream(environ['wsgi.input'], int(environ['CONTENT_LENGTH'] or 0))
+        environ['wsgi.input'] = stream
+        app_iter = self.app(environ, start_response)
+        try:
+            stream.exhaust()
+            for event in app_iter:
+                yield event
+        finally:
+            if hasattr(app_iter, 'clost'):
+                app_iter.close()
+
+app.config['UPLOAD_FOLDER'] = 'static/Uploads'
+app.wsgi_app = StreamConsumingMiddleware(app.wsgi_app)
+        
 
 @app.route('/')
 def main():
@@ -46,6 +70,15 @@ def userHome():
 @app.route('/showAddWish')
 def showAddWish():
     return render_template('addWish.html')
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.methods == 'POST':
+        file = request.files['file']
+        extension = os.path.splitext(file.filename)[1]
+        f_name = str(uuid.uuid4()) + extension
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], f_name))
+        return json.dumps({'filename' : f_name})
 
 @app.route('/signUp',methods=['POST','GET'])
 def signUp():
