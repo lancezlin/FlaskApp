@@ -1,0 +1,6 @@
+CREATE TABLE `BucketList`.`tbl_likes` (
+  `wish_id` INT NOT NULL,
+  `like_id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NULL,
+  `wish_like` INT NULL DEFAULT 0,
+  PRIMARY KEY (`like_id`));

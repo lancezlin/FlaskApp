@@ -71,6 +71,10 @@ def userHome():
 def showAddWish():
     return render_template('addWish.html')
 
+@app.route('/showDashboard')
+def showDashboard():
+    return render_template('dashboard.html')
+
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
@@ -128,7 +132,7 @@ def validateLogin():
         if len(data) > 0:
             if check_password_hash(str(data[0][3]),_password):
                 session['user'] = data[0][0]
-                return redirect('/userHome')
+                return redirect('/showDashboard')
             else:
                 return render_template('error.html',error = 'Wrong Email address or Password.')
         else:
@@ -216,6 +220,59 @@ def getWish():
             return render_template('error.html', error = 'Unauthorized Access')
     except Exception as e:
         return render_template('error.html', error = str(e))
+
+@app.route('/getAllWishes')
+def getAllWishes():
+    try:
+        if session.get('user'):
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.callproc('sp_GetAllWishes')
+            result = cursor.fetchall()
+
+            wishes_dict = []
+            for wish in result:
+                wish_dict = {
+                    'Id' : wish[0],
+                    'Title' : wish[1],
+                    'Description' : wish[2],
+                    'FilePath' : wish[3]
+                }
+                wishes_dict.append(wish_dict)
+            return json.dumps(wishes_dict)
+
+        else:
+            return render_template('error.html', error = 'Unauthorized Access')
+    except Exception as e:
+        return render_template('error.html', error = str(e))
+
+@app.route('/addUpdateLike', methods=['POST'])
+def addUpdateLike():
+    try:
+        if session.get('user'):
+            _wishId = request.form['wish']
+            _like = request.form['like']
+            _user = session.get('user')
+
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.callproc('sp_AddUpdateLikes', ('_wishId', '_user', '_like'))
+            data = cursor.fetchall()
+
+            if len(data) is 0:
+                conn.commit()
+                return json.dumps({'status' : 'OK'})
+            else:
+                return render_template('error.html', error = 'An error occurred!')
+
+        else:
+            return render_template('error.html', error = 'Unauthorized Access!')
+
+    except Exception as e:
+        return render_template('error.html', error = str(e))
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.route('/getWishById', methods=['POST'])
 def getWishById():
