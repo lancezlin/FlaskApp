@@ -25,3 +25,43 @@ BEGIN
  
     end if;
 END$$
+
+DROP PROCEDURE IF EXISTS sp_AddUpdateLikes;
+DELIMITER $$
+ 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_AddUpdateLikes`(
+    p_wish_id int,
+    p_user_id int,
+    p_like int
+)
+BEGIN
+     
+    if (select exists (select 1 from tbl_likes where wish_id = p_wish_id and user_id = p_user_id)) then
+ 
+         
+        select wish_like into @currentVal from tbl_likes where wish_id = p_wish_id and user_id = p_user_id;
+         
+        if @currentVal = 0 then
+            update tbl_likes set wish_like = 1 where wish_id = p_wish_id and user_id = p_user_id;
+        else
+            update tbl_likes set wish_like = 0 where wish_id = p_wish_id and user_id = p_user_id;
+        end if;
+         
+    else
+         
+        insert into tbl_likes(
+            wish_id,
+            user_id,
+            wish_like
+        )
+        values(
+            p_wish_id,
+            p_user_id,
+            p_like
+        );
+ 
+ 
+    end if;
+END$$
+
+DELIMITER ;

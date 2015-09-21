@@ -1,0 +1,22 @@
+DROP PROCEDURE IF EXISTS sp_GetAllWishes;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetAllWishes`()
+BEGIN
+    select wish_id,wish_title,wish_description,wish_file_path,getSum(wish_id)
+    from tbl_wish where wish_private = 0;
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS sp_GetAllWishes;
+DELIMITER $$
+ 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetAllWishes`(
+    p_user int
+)
+BEGIN
+    select wish_id,wish_title,wish_description,wish_file_path,getSum(wish_id),hasLiked(wish_id,p_user)
+    from tbl_wish where wish_private = 0;
+END$$
+DELIMITER ;
